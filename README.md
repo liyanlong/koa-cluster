@@ -6,10 +6,12 @@
 Lightweight, opinionated clustering for Koa apps.
 Use this if you don't want the complexity of other process managers.
 
+
 ## Usage
 
 ```bash
-koa-cluster app.js
+koa-cluster-plus app.js
+
 ```
 
 ## Koa App
@@ -48,11 +50,24 @@ These settings are:
 - `maxHeadersCount`
 - `timeout`
 
+You can also setting options in command-cli
+
+
+### Master
+
+
+### Help
+```bash
+koa-cluster --help/-h
+
+```
+
 ## License
 
 The MIT License (MIT)
 
 Copyright (c) 2014 Jonathan Ong me@jongleberry.com
+Copyright (c) 2019 liyanlong Ong 295697141@qq.com
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

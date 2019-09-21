@@ -1,5 +1,5 @@
 {
-  "name": "koa-cluster",
+  "name": "koa-cluster-plus",
   "description": "Koa clustering and domain-based error handling utility",
   "version": "1.1.0",
   "author": {
@@ -13,8 +13,18 @@
   "dependencies": {
     "commander": "2"
   },
-  "bin": "bin/koa-cluster",
+  "bin": {
+    "koa-cluster": "bin/koa-cluster",
+    "koa-cluster-plus": "bin/koa-cluster-plus.js"
+  },
+  "scripts": {
+    "help": "node bin/koa-cluster-plus.js -h",
+    "test:master": "node bin/koa-cluster-plus.js ./example/master-worker/app.js -P 8000 -e ./example/master-worker/master.js"
+  },
   "engines": {
     "node": ">= 4.0.0"
+  },
+  "devDependencies": {
+    "koa": "^2.8.1"
   }
 }
