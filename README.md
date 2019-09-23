@@ -1,5 +1,6 @@
 
-# Koa Cluster
+# Koa Cluster Plus
+> fork by koa-plus, support more custom options
 
 <a href="https://communityinviter.com/apps/koa-js/koajs" rel="KoaJs Slack Community">![KoaJs Slack](https://img.shields.io/badge/Koa.Js-Slack%20Channel-Slack.svg?longCache=true&style=for-the-badge)</a>
 
@@ -53,13 +54,11 @@ These settings are:
 You can also setting options in command-cli
 
 
-### Master
-
-
-### Help
+### Examples
 ```bash
-koa-cluster --help/-h
-
+koa-cluster-plus --help/-h
+koa-cluster-plus ./app.js  -e entry.js
+koa-cluster-plus ./app.js  -e entry.js -P 8000 -H 0.0.0.0
 ```
 
 ## License
