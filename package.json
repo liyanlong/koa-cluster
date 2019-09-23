@@ -20,7 +20,7 @@
     "test:master": "node bin/koa-cluster-plus.js ./example/master-worker/app.js -P 8000 -e ./example/master-worker/master.js"
   },
   "engines": {
-    "node": ">= 4.0.0"
+    "node": ">= 8.0.0"
   },
   "devDependencies": {
     "koa": "^2.8.1"
