@@ -63,13 +63,9 @@ function terminate() {
     cluster.workers[id].kill('SIGTERM')
   })
   
-  if (typeof onTerminal == 'function') {
-      Promise.resolve().then(() => {
-        process.exit(0)
-      })
-  } else {
+  Promise.resolve(onTerminal && onTerminal()).then(() => {
     process.exit(0)
-  }
+  })
 }
 
 // remember the time which children have started in order
