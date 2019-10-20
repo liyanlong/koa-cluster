@@ -1,7 +1,7 @@
 {
   "name": "koa-cluster-plus",
   "description": "Koa clustering plus, support master entry file",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "author": {
     "name": "liyanlong",
     "email": "295697141@qq.com"
