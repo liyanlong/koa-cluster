@@ -10,7 +10,7 @@ program
   .option('-s, --startsecs <int>', 'number of seconds which children needs to'
     + ' stay running to be considered a successfull start [1]', parseInt, 1)
   .option('-e, --entry <str>', 'master process entrypoint')
-  .option('-P --port <int>', 'koa worker process bind port', parseInt, 8080)
+  .option('-P --port <int>', 'koa worker process bind port', 8080)
   .option('-H --host <str>', 'koa worker process bind hostname', '0.0.0.0')
   .parse(process.argv)
 
