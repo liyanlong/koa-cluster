@@ -12,7 +12,8 @@ Use this if you don't want the complexity of other process managers.
 
 ```bash
 koa-cluster-plus app.js
-
+koa-cluster-plus app.js --entry ./master.js
+koa-cluster-plus app.js --agent ./agent.js --entry ./master.js
 ```
 
 ## Koa App
@@ -20,12 +21,34 @@ koa-cluster-plus app.js
 You must export your Koa app like:
 
 ```js
-var app = module.exports = koa()
+var app = module.exports = koa();
+app.port = 'xxx'; // default: use process.env.PORT
+app.host = 'xxx'; // default: use process.env.HOST
 ```
 
 Make sure you don't create a `http` server yourself.
 Don't call `app.listen()`.
 This will handle it automatically.
+
+## Koa Agent
+master
+- one agent
+- multips worker
+
+## Koa Master Entry
+```js
+
+module.exports = () => {
+  // run master.js
+ 
+  return () => {
+    return new Promise((resolve) => {
+      resolve();
+    })
+  }
+}
+
+```
 
 ### Check Continue
 
