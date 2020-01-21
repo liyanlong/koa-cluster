@@ -17,7 +17,8 @@
   },
   "scripts": {
     "help": "node bin/koa-cluster-plus.js -h",
-    "test:master": "node bin/koa-cluster-plus.js ./example/master-worker/app.js -P 8000 -e ./example/master-worker/master.js"
+    "test:master": "node bin/koa-cluster-plus.js ./example/master-worker/app.js -P 8000 --agent ./example/master-worker/agent.js -e ./example/master-worker/master.js -p 2 --title test",
+    "stop": "node bin/koa-cluster-plus.js --stop --title test"
   },
   "engines": {
     "node": ">= 8.0.0"

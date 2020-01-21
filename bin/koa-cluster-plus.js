@@ -10,6 +10,7 @@ program
   .option('-s, --startsecs <int>', 'number of seconds which children needs to'
     + ' stay running to be considered a successfull start [1]', parseInt, 1)
   .option('-e, --entry <str>', 'master process entrypoint')
+  .option('-A, --agent <str>', 'agent process file')
   .option('-P --port <int>', 'koa worker process bind port', 8080)
   .option('-H --host <str>', 'koa worker process bind hostname', '0.0.0.0')
   .parse(process.argv)
@@ -30,9 +31,10 @@ process.env.PORT = program.port || process.env.PORT
 process.env.HOST = program.host || process.env.HOST
 if (program.title) process.title = program.title
 
-forkWorkers()
 
 var onTerminal = null
+
+// 入口文件
 if (program.entry) {
   var entryfile = require('path').resolve(program.entry)
   try {
@@ -46,6 +48,30 @@ if (program.entry) {
   Promise.resolve(typeof entry === 'function' ? entry() : entry).then((_onTerminal) => {
     onTerminal = typeof _onTerminal == 'function' ? _onTerminal : null
   })
+}
+
+var agentFile = null
+
+// 查找 agent 文件是否存在
+if (program.agent) {
+  agentFile = require('path').resolve(program.agent)
+  try {
+    require('fs').statSync(agentFile)
+  } catch (err) {
+    console.error('agentFile %s to %s', program.agent, agentFile)
+    console.error('however, %s does not exist', agentFile)
+    process.exit(2)
+  }
+}
+
+console.log('master process start pid %s', process.pid);
+if (agentFile) {
+  forkAgent().then(() => {
+    forkWorkers();
+  });
+
+} else {
+  forkWorkers();
 }
 
 
@@ -82,7 +108,12 @@ function onDisconnect(worker) {
     terminate()
   } else {
     console.log('worker ' + worker.process.pid + ' has died. forking.')
-    cluster.fork()
+    console.info( worker.__type)
+    if (worker.__type == 'agent') {
+      forkAgent();
+    } else {
+      forkWorker();
+    }
   }
 }
 
@@ -99,12 +130,50 @@ process.on('uncaughtException', (err) => {
   console.error(err.stack)
 })
 
-// ready
+// 自定义reload
+process.on('SIGUSR2', () => {
+  // 热重启
+  Object.keys(cluster.workers).forEach(function (id, index) {
+    setTimeout(() => {
+      console.info('reload worker %s', id);
+      console.log('sending kill signal to worker %s', id)
+      cluster.workers[id].kill('SIGTERM');
+    }, 3000 * index);
+  })
+
+});
+
+
+function forkAgent () {
+
+  cluster.setupMaster({
+    exec: require.resolve('../lib/agent.js'),
+    execArgv: ['--harmony'],
+    args: ['--title', agentFile],
+  })
+  return new Promise((resolve) => {
+    const worker = cluster.fork();
+    worker.__type = 'agent';
+    resolve(worker);
+  })
+}
+
+function forkWorker () {
+  cluster.setupMaster({
+    exec: require.resolve('../lib/http.js'),
+    execArgv: ['--harmony'],
+    args: ['--app', requirename],
+  })
+  let worker = cluster.fork();
+  worker.process.__type = 'app';
+  return worker;
+}
+
 function forkWorkers () {
   cluster.setupMaster({
     exec: require.resolve('../lib/http.js'),
     execArgv: ['--harmony'],
-    args: [requirename],
+    args: ['--app', requirename],
   })
 
   // worker process nums
@@ -113,12 +182,15 @@ function forkWorkers () {
   if (program.processes) {
     procs = program.processes;
   } else {
-    var cpus = require('os').cpus().length
-    procs = Math.ceil(0.75 * cpus)
+    var cpus = require('os').cpus().length;
+    if (agentFile) {
+      cpus -= 1;
+    }
+    procs = Math.max(1, Math.ceil(0.75 * cpus));
   }
 
-  for (var i = 0; i < procs; i++) cluster.fork()
+  for (var i = 0; i < procs; i++) {
+    forkWorker();
+  }
 
 }
-
-
