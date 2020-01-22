@@ -85,10 +85,10 @@ function terminate() {
   cluster.removeListener('disconnect', onDisconnect)
   // kill all workers
   Object.keys(cluster.workers).forEach(function (id) {
-    console.log('sending kill signal to worker %s', id)
+    console.log(`sending kill signal to ${cluster.workers[id].__type} worker %s`, id)
     cluster.workers[id].kill('SIGTERM')
   })
-  
+
   Promise.resolve(onTerminal && onTerminal()).then(() => {
     process.exit(0)
   })
@@ -106,9 +106,13 @@ function onDisconnect(worker) {
       + ' before startsecs is over. stopping all.')
     process.exitCode = worker.process.exitCode || 1
     terminate()
+  } else if (worker.__type == 'agent' && worker.process.exitCode > 0) {
+    console.log('agent worker ' + worker.process.pid + ' has died'
+    + 'stopping all.')
+    process.exitCode = worker.process.exitCode
+    terminate()
   } else {
     console.log('worker ' + worker.process.pid + ' has died. forking.')
-    console.info( worker.__type)
     if (worker.__type == 'agent') {
       forkAgent();
     } else {
@@ -142,8 +146,10 @@ process.on('SIGUSR2', () => {
   })
 
 });
-
-
+process.on('exit', (code) => {
+  console.log('exit master process %s, code %s', process.pid, code);
+  
+})
 function forkAgent () {
 
   cluster.setupMaster({
@@ -165,7 +171,7 @@ function forkWorker () {
     args: ['--app', requirename],
   })
   let worker = cluster.fork();
-  worker.process.__type = 'app';
+  worker.__type = 'app';
   return worker;
 }
 
